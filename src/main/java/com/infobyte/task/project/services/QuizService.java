@@ -9,4 +9,6 @@ public interface QuizService {
     QuizDto updateQuiz(Long id, QuizDto quizDto);
     void deleteQuiz(Long id);
     List<QuizDto> getAllQuizzes();
+
+    QuizDto getQuizById(Long id);
 }

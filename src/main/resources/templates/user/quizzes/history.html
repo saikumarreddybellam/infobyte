@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Quiz History</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/ui/dashboard}">Quiz App</a>
+    <div class="navbar-nav ms-auto">
+      <span class="navbar-text me-3" th:text="'Welcome, ' + ${#authentication.name}"></span>
+      <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn btn-outline-light">Logout</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h2>Your Quiz Attempts</h2>
+  <a th:href="@{/ui/dashboard}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+
+  <div th:if="${#lists.isEmpty(attempts)}" class="alert alert-info">
+    You haven't attempted any quizzes yet.
+  </div>
+
+  <div class="list-group">
+    <div th:each="attempt : ${attempts}" class="list-group-item">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h5 th:text="${attempt.quizTitle}"></h5>
+          <small class="text-muted"
+                 th:text="${#temporals.format(attempt.attemptedOn, 'yyyy-MM-dd HH:mm')}"></small>
+        </div>
+        <div>
+                    <span class="badge bg-primary rounded-pill"
+                          th:text="${attempt.score} + '/' + ${attempt.totalQuestions}"></span>
+          <a th:href="@{/ui/user/quizzes/{quizId}/result/{attemptId}(quizId=${attempt.quizId}, attemptId=${attempt.attemptId})}"
+             class="btn btn-sm btn-info ms-2">View Details</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

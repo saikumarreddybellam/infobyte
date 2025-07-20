@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${quizId != null} ? 'Quiz Leaderboard' : 'Overall Leaderboard'"></title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/ui/dashboard}">Quiz App</a>
+    <div class="navbar-nav ms-auto">
+      <span class="navbar-text me-3" th:text="'Welcome, ' + ${#authentication.name}"></span>
+      <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn btn-outline-light">Logout</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h2 th:text="${quizId != null} ? 'Quiz Leaderboard' : 'Overall Leaderboard'"></h2>
+  <a th:href="@{/ui/dashboard}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+
+  <div class="card">
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Username</th>
+          <th>Score</th>
+          <th th:if="${quizId == null}">Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="entry, iter : ${entries}">
+          <td th:text="${iter.count}"></td>
+          <td th:text="${entry.username}"></td>
+          <td th:text="${entry.score}"></td>
+          <td th:if="${quizId == null}" th:text="${#temporals.format(entry.date, 'yyyy-MM-dd HH:mm')}"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

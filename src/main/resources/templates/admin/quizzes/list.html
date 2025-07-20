@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Quizzes</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/ui/dashboard}">Quiz App</a>
+    <div class="navbar-nav ms-auto">
+      <span class="navbar-text me-3" th:text="'Welcome, ' + ${#authentication.name}"></span>
+      <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn btn-outline-light">Logout</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h2>Quiz Management</h2>
+  <a th:href="@{/ui/dashboard}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+  <a th:href="@{/ui/admin/quizzes/create}" class="btn btn-primary mb-3">Create New Quiz</a>
+
+  <div th:if="${#lists.isEmpty(quizzes)}" class="alert alert-info">
+    No quizzes found.
+  </div>
+
+  <div class="list-group">
+    <div th:each="quiz : ${quizzes}" class="list-group-item">
+      <div class="d-flex justify-content-between">
+        <div>
+          <h5 th:text="${quiz.title}"></h5>
+          <p class="mb-1" th:text="${quiz.description}"></p>
+          <small class="text-muted" th:text="${quiz.topic} + ' | ' + ${quiz.difficulty}"></small>
+        </div>
+        <div class="btn-group">
+          <a th:href="@{/ui/admin/quizzes/{id}/edit(id=${quiz.id})}" class="btn btn-sm btn-warning">Edit</a>
+          <a th:href="@{/ui/admin/quizzes/{id}/questions(id=${quiz.id})}" class="btn btn-sm btn-info">Questions</a>
+          <form th:action="@{/ui/admin/quizzes/{id}/delete(id=${quiz.id})}" method="post">
+            <button type="submit" class="btn btn-sm btn-danger"
+                    onclick="return confirm('Are you sure you want to delete this quiz?')">
+              Delete
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

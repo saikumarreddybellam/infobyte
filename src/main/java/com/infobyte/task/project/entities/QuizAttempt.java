@@ -32,6 +32,8 @@ public class QuizAttempt {
 
     private LocalDateTime attemptTime;
 
+    private Long count;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -42,4 +44,6 @@ public class QuizAttempt {
 
     @OneToMany(mappedBy = "quizAttempt", cascade = CascadeType.ALL)
     private List<UserAnswer> userAnswers = new ArrayList<>();
+
+
 }

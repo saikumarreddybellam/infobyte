@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Application</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+  <div class="jumbotron text-center">
+    <h1 class="display-4">Welcome to Quiz App</h1>
+    <p class="lead">Test your knowledge with our interactive quizzes</p>
+    <hr class="my-4">
+    <div class="d-grid gap-2 col-md-6 mx-auto">
+      <a th:href="@{/ui/auth/login}" class="btn btn-primary btn-lg">Login</a>
+      <a th:href="@{/ui/auth/register}" class="btn btn-secondary btn-lg">Register</a>
+      <a th:href="@{/ui/user/quizzes}" class="btn btn-success btn-lg">Take a Quiz</a>
+      <a th:href="@{/ui/leaderboard/overall}" class="btn btn-info btn-lg">View Leaderboard</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

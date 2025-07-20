@@ -57,4 +57,15 @@ public class QuestionServiceImpl implements QuestionService {
     public void deleteQuestion(Long id) {
         questionRepository.deleteById(id);
     }
+
+    @Override
+    public QuestionDto getQuestionById(Long id) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+
+        QuestionDto questionDto = mapper.map(question, QuestionDto.class);
+        questionDto.setQuizId(question.getQuiz().getId());
+
+        return mapper.map(questionRepository.save(question), QuestionDto.class);
+    }
 }

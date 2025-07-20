@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Question</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+  <h2>Edit Question</h2>
+  <a th:href="@{/ui/admin/questions/{quizId}/list(quizId=${quizId})}" class="btn btn-secondary mb-3">Back to Questions</a>
+
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+  <form th:action="@{/ui/admin/questions/{id}/update(id=${questionDto.id})}" method="post">
+    <input type="hidden" th:field="*{questionDto.id}">
+    <input type="hidden" th:field="*{questionDto.quizId}">
+
+    <div class="mb-3">
+      <label for="questionText" class="form-label">Question Text</label>
+      <input type="text" class="form-control" id="questionText"
+             th:field="*{questionDto.questionText}" required>
+    </div>
+
+    <div class="options-container mb-3">
+      <h5>Options</h5>
+      <div class="option-row mb-2" th:each="opt, iterStat : *{questionDto.options}">
+        <input type="hidden" th:field="*{questionDto.options[__${iterStat.index}__].id}">
+        <div class="input-group">
+          <input type="text" class="form-control" th:field="*{questionDto.options[__${iterStat.index}__].text}"
+                 placeholder="Option text" required>
+          <div class="input-group-text">
+            <input class="form-check-input" type="checkbox"
+                   th:field="*{questionDto.options[__${iterStat.index}__].isCorrect}">
+            <label class="form-check-label ms-2">Correct?</label>
+          </div>
+          <button type="button" class="btn btn-outline-danger remove-option">Remove</button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-primary" id="add-option">Add Option</button>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Question</button>
+  </form>
+</div>
+
+<script src="/js/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+      $('#add-option').click(function() {
+          const newOption = `
+          <div class="option-row mb-2">
+              <div class="input-group">
+                  <input type="text" class="form-control" name="questionDto.options[__${$('.option-row').length}__].text"
+                         placeholder="Option text" required>
+                  <div class="input-group-text">
+                      <input class="form-check-input" type="checkbox"
+                             name="questionDto.options[__${$('.option-row').length}__].isCorrect">
+                      <label class="form-check-label ms-2">Correct?</label>
+                  </div>
+                  <button type="button" class="btn btn-outline-danger remove-option">Remove</button>
+              </div>
+          </div>`;
+          $('.options-container').append(newOption);
+      });
+
+      $(document).on('click', '.remove-option', function() {
+          $(this).closest('.option-row').remove();
+      });
+</script>
+</body>
+</html>

@@ -6,4 +6,6 @@ public interface QuestionService {
     QuestionDto addQuestionToQuiz(Long quizId, QuestionDto questionDto);
     QuestionDto updateQuestion(Long id, QuestionDto questionDto);
     void deleteQuestion(Long id);
+
+    QuestionDto getQuestionById(Long id);
 }

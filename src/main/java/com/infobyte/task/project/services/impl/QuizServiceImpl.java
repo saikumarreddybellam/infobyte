@@ -48,4 +48,12 @@ public class QuizServiceImpl implements QuizService {
                 .map(quiz -> mapper.map(quiz, QuizDto.class))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public QuizDto getQuizById(Long id) {
+        return quizRepository.findById(id)
+                .map(quiz -> mapper.map(quiz, QuizDto.class))
+                .orElseThrow(() -> new RuntimeException("Quiz not found with id: " + id));
+    }
+
 }

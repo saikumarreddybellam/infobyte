@@ -1,5 +1,6 @@
 package com.infobyte.task.project.security;
 
+import com.infobyte.task.project.services.CustomUserDetailsService;
 import com.infobyte.task.project.utility.JwtTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -10,11 +11,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -24,6 +23,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtTokenService jwtTokenService; // needed for filter
+    private final CustomUserDetailsService customUserDetailsService;
+    private final UserDetailsService userDetailsService;
+
 
     @Bean
     public JwtAuthFilter jwtAuthFilter(UserDetailsService userDetailsService) {
@@ -35,23 +37,38 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/ui/auth/**",
+                                "/ui/register",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password",
+                                "/ui/auth/forgot-password",
+                                "/ui/auth/reset-password",
+                                "/ui/dashboard",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers("/ui/dashboard").hasRole("USER")
+                        .requestMatchers("/api/user/profile/**").hasRole("USER")
+                        .requestMatchers("/api/admin/**", "/ui/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/user/**", "/ui/user/**", "/ui/dashboard/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
+    // Replace InMemoryUserDetailsManager with your CustomUserDetailsService
     @Bean
     public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(
-                User.withUsername("admin")
-                        .password("{noop}admin")
-                        .roles("ADMIN")
-                        .build()
-        );
+        return customUserDetailsService;
     }
 
     @Bean
@@ -64,4 +81,6 @@ public class SecurityConfig {
             throws Exception {
         return config.getAuthenticationManager();
     }
+
+
 }

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${quiz.title} + ' Quiz'"></title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/ui/dashboard}">Quiz App</a>
+    <div class="navbar-nav ms-auto">
+      <span class="navbar-text me-3" th:text="'Welcome, ' + ${#authentication.name}"></span>
+      <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn btn-outline-light">Logout</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h2 th:text="${quiz.title}"></h2>
+  <p class="lead" th:text="${quiz.description}"></p>
+  <a th:href="@{/ui/user/quizzes}" class="btn btn-secondary mb-3">Back to Quizzes</a>
+
+  <form th:action="@{/ui/user/quizzes/{id}/attempt(id=${quiz.id})}" method="post">
+    <div th:each="question, iter : ${quiz.questions}" class="card mb-3">
+      <div class="card-header">
+        <h5 th:text="${iter.count} + '. ' + ${question.questionText}"></h5>
+      </div>
+      <div class="card-body">
+        <div th:each="option : ${question.options}" class="form-check mb-2">
+          <input class="form-check-input" type="radio"
+                 th:name="answers[${iter.index}].questionId"
+                 th:value="${question.id}" hidden checked>
+          <input class="form-check-input" type="radio"
+                 th:name="answers[${iter.index}].selectedOptionId"
+                 th:value="${option.id}"
+                 th:id="'option_' + ${option.id}"
+                 required>
+          <label class="form-check-label" th:for="'option_' + ${option.id}"
+                 th:text="${option.text}"></label>
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-lg">Submit Quiz</button>
+  </form>
+</div>
+</body>
+</html>

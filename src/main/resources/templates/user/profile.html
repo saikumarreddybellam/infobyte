@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Profile</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/ui/dashboard}">Quiz App</a>
+        <div class="navbar-nav ms-auto">
+            <span class="navbar-text me-3" th:text="'Welcome, ' + ${#authentication.name}"></span>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-outline-light">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <img src="/images/avatar.png" class="rounded-circle mb-3" width="150" height="150">
+                    <h4 th:text="${user.username}"></h4>
+                    <span th:if="${user.role == 'ADMIN'}" class="badge bg-danger">Admin</span>
+                    <span th:if="${user.role == 'USER'}" class="badge bg-primary">User</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/ui/user/profile/update}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" th:value="${user.username}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="password" name="password">
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container mt-4">
+    <!-- Profile Display Section -->
+    <div id="profileView">
+        <h2>Your Profile</h2>
+        <div class="card">
+            <div class="card-body">
+                <p><strong>Username:</strong> <span id="username"></span></p>
+                <p><strong>Email:</strong> <span id="email"></span></p>
+                <p><strong>Member Since:</strong> <span id="registeredAt"></span></p>
+                <p><strong>Quizzes Taken:</strong> <span id="quizAttempts"></span></p>
+                <p><strong>Average Score:</strong> <span id="averageScore"></span>%</p>
+                <button id="editProfileBtn" class="btn btn-primary">Edit Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Edit Form (initially hidden) -->
+    <div id="profileEditForm" style="display: none;">
+        <h2>Edit Profile</h2>
+        <form id="updateProfileForm">
+            <div class="mb-3">
+                <label for="emailInput" class="form-label">Email</label>
+                <input type="email" class="form-control" id="emailInput">
+            </div>
+            <div class="mb-3">
+                <label for="passwordInput" class="form-label">New Password</label>
+                <input type="password" class="form-control" id="passwordInput">
+            </div>
+            <div class="mb-3">
+                <label for="confirmPasswordInput" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPasswordInput">
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" id="cancelEditBtn" class="btn btn-secondary">Cancel</button>
+        </form>
+    </div>
+
+    <!-- Status Message Area -->
+    <div id="statusMessage" class="mt-3"></div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = /*[[${#httpServletRequest.getAttribute('accessToken')}]]*/ '';
+
+            // DOM Elements
+            const profileView = document.getElementById('profileView');
+            const editForm = document.getElementById('profileEditForm');
+            const editBtn = document.getElementById('editProfileBtn');
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            const updateForm = document.getElementById('updateProfileForm');
+            const statusMessage = document.getElementById('statusMessage');
+
+            // Load profile data on page load
+            loadProfile();
+
+            // Toggle between view and edit modes
+            editBtn.addEventListener('click', function() {
+                profileView.style.display = 'none';
+                editForm.style.display = 'block';
+                loadProfileDataIntoForm();
+            });
+
+            cancelBtn.addEventListener('click', function() {
+                profileView.style.display = 'block';
+                editForm.style.display = 'none';
+                clearStatusMessage();
+            });
+
+            // Handle form submission
+            updateForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateProfile();
+            });
+
+            async function loadProfile() {
+                try {
+                    const response = await fetch('/api/user/profile', {
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to load profile');
+
+                    const profile = await response.json();
+
+                    // Display profile data
+                    document.getElementById('username').textContent = profile.username;
+                    document.getElementById('email').textContent = profile.email || 'Not set';
+                    document.getElementById('registeredAt').textContent =
+                        new Date(profile.registeredAt).toLocaleDateString();
+                    document.getElementById('quizAttempts').textContent = profile.totalQuizAttempts;
+                    document.getElementById('averageScore').textContent =
+                        profile.averageScore.toFixed(1);
+
+                } catch (error) {
+                    showStatusMessage(error.message, 'danger');
+                }
+            }
+
+            function loadProfileDataIntoForm() {
+                const email = document.getElementById('email').textContent;
+                document.getElementById('emailInput').value = email !== 'Not set' ? email : '';
+            }
+
+            async function updateProfile() {
+                const email = document.getElementById('emailInput').value;
+                const password = document.getElementById('passwordInput').value;
+                const confirmPassword = document.getElementById('confirmPasswordInput').value;
+
+                if (password && password !== confirmPassword) {
+                    showStatusMessage('Passwords do not match', 'danger');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/user/profile', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            password: password,
+                            confirmPassword: confirmPassword
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.text();
+                        throw new Error(error);
+                    }
+
+                    showStatusMessage('Profile updated successfully', 'success');
+                    loadProfile(); // Refresh profile data
+                    profileView.style.display = 'block';
+                    editForm.style.display = 'none';
+
+                } catch (error) {
+                    showStatusMessage(error.message, 'danger');
+                }
+            }
+
+            function showStatusMessage(message, type) {
+                statusMessage.innerHTML = `
+                    <div class="alert alert-${type} alert-dismissible fade show">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+            }
+
+            function clearStatusMessage() {
+                statusMessage.innerHTML = '';
+            }
+        });
+    /*]]>*/
+</script>
+
+<!-- Include Bootstrap JS for alert dismiss -->
+<script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

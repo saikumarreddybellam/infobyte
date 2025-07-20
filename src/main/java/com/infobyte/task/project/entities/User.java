@@ -7,12 +7,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +36,11 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private String role;
+
+    @Column(nullable = false)
+    private String email;
+
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<QuizAttempt> quizAttempts = new ArrayList<>();
@@ -62,4 +69,10 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    @PrePersist
+    private void setCreatedAtWhilePersisting() {
+        createdAt= LocalDateTime.now();
+    }
+
 }
