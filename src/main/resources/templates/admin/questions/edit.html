@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Question</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/ui/dashboard}">Quiz App</a>
+        <div class="navbar-nav ms-auto">
+            <span class="navbar-text me-3" sec:authorize="isAuthenticated()">
+                Welcome, <span sec:authentication="principal.username"></span>
+            </span>
+            <form th:action="@{/ui/auth/logout}" method="post" sec:authorize="isAuthenticated()">
+                <button type="submit" class="btn btn-outline-light">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2>Edit Question</h2>
+
+    <div class="d-flex justify-content-between mb-3">
+        <a th:href="@{'/ui/admin/quizzes/' + ${quizId} + '/questions'}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Questions
+        </a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{'/ui/admin/questions/' + ${questionDto.id} + '/update'}"
+          th:object="${questionDto}" method="post">
+        <input type="hidden" th:field="*{id}">
+        <input type="hidden" th:field="*{quizId}">
+
+        <div class="mb-3">
+            <label for="questionText" class="form-label">Question Text</label>
+            <textarea class="form-control" id="questionText" th:field="*{questionText}"
+                      rows="3" required></textarea>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('questionText')}"
+                 th:errors="*{questionText}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Answer Options</label>
+            <div th:each="option, iter : *{options}" class="card mb-3">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label th:for="|optionText${iter.index}|" class="form-label">Option Text</label>
+                        <input type="text" class="form-control" th:id="|optionText${iter.index}|"
+                               th:field="*{options[__${iter.index}__].text}" required>
+                        <div class="invalid-feedback"
+                             th:if="${#fields.hasErrors('options[' + iter.index + '].text')}"
+                             th:errors="*{options[__${iter.index}__].text}"></div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                               th:id="|correct${iter.index}|"
+                               th:field="*{options[__${iter.index}__].correct}">
+                        <label class="form-check-label" th:for="|correct${iter.index}|">
+                            Correct Answer
+                        </label>
+                    </div>
+                    <input type="hidden" th:field="*{options[__${iter.index}__].id}">
+                    <input type="hidden" th:field="*{options[__${iter.index}__].questionId}">
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary"
+                    onclick="addOption()">
+                <i class="bi bi-plus"></i> Add Option
+            </button>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Update Question
+        </button>
+    </form>
+</div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script>
+    function addOption() {
+        const optionsContainer = document.querySelector('.mb-3 .card:last-child')?.parentElement ||
+                                document.querySelector('.mb-3');
+
+        const optionCount = document.querySelectorAll('.card').length;
+
+        const newOption = document.createElement('div');
+        newOption.className = 'card mb-3';
+        newOption.innerHTML = `
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Option Text</label>
+                    <input type="text" class="form-control"
+                           name="options[${optionCount}].text" required>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox"
+                           name="options[${optionCount}].correct">
+                    <label class="form-check-label">
+                        Correct Answer
+                    </label>
+                </div>
+                <input type="hidden" name="options[${optionCount}].id" value="">
+                <input type="hidden" name="options[${optionCount}].questionId" value="">
+            </div>
+        `;
+        optionsContainer.insertBefore(newOption, optionsContainer.lastElementChild);
+    }
+
+    // Ensure only one correct answer can be selected
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.matches('input[type="checkbox"][name$="correct"]')) {
+            if (e.target.checked) {
+                document.querySelectorAll('input[type="checkbox"][name$="correct"]').forEach(cb => {
+                    if (cb !== e.target) cb.checked = false;
+                });
+            }
+        }
+    });
+</script>
+</body>
+</html>

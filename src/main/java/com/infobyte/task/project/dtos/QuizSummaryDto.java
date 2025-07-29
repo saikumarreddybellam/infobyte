@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class QuizSummaryDto {
     private Long id;
     private String title;
+    private String description;
     private String topic;
     private String difficulty;
     private int totalQuestions;

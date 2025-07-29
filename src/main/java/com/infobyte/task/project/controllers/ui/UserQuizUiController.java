@@ -1,5 +1,6 @@
 package com.infobyte.task.project.controllers.ui;
 
+import com.infobyte.task.project.dtos.QuizDto;
 import com.infobyte.task.project.dtos.QuizResultDto;
 import com.infobyte.task.project.dtos.QuizSubmissionDto;
 import com.infobyte.task.project.services.QuizAttemptService;
@@ -30,7 +31,9 @@ public class UserQuizUiController {
 
     @GetMapping("/{quizId}")
     public String showQuizForUser(@PathVariable Long quizId, Model model) {
-        model.addAttribute("quiz", quizAttemptService.getQuizForUser(quizId));
+        QuizDto quiz = quizAttemptService.getQuizForUser(quizId);
+        model.addAttribute("quiz", quiz);
+        model.addAttribute("quizSubmissionDto", new QuizSubmissionDto());
         return "user/quizzes/attempt";
     }
 

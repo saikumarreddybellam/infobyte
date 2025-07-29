@@ -20,4 +20,13 @@ public class QuestionDto {
     private List<OptionDto> options;
 
     private Long quizId;
+
+    // Add explicit getters and setters if Lombok isn't working properly
+    public List<OptionDto> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<OptionDto> options) {
+        this.options = options;
+    }
 }

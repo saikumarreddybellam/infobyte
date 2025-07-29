@@ -20,4 +20,7 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
     @Query("SELECT AVG(a.score) FROM QuizAttempt a WHERE a.user.username = :username")
     Optional<Double> getAverageScoreByUser(@Param("username") String username);
 
+    List<QuizAttempt> findByQuizId(Long quizId);
+
+    void deleteByQuizId(Long quizId);
 }

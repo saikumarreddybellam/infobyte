@@ -1,5 +1,6 @@
 package com.infobyte.task.project.controllers.ui;
 
+import com.infobyte.task.project.dtos.OptionDto;
 import com.infobyte.task.project.dtos.QuestionDto;
 import com.infobyte.task.project.services.QuestionService;
 import com.infobyte.task.project.services.QuizService;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping("/ui/admin/questions")
@@ -48,6 +51,20 @@ public class QuestionUiController {
     @GetMapping("/{id}/edit")
     public String showEditQuestionForm(@PathVariable Long id, Model model) {
         QuestionDto questionDto = questionService.getQuestionById(id);
+
+        // Ensure options list is never null
+        if (questionDto.getOptions() == null) {
+            questionDto.setOptions(new ArrayList<>());
+        }
+
+        // If no options exist, initialize with 2 empty options (like create form)
+        if (questionDto.getOptions().isEmpty()) {
+            questionDto.getOptions().add(new OptionDto());
+            questionDto.getOptions().add(new OptionDto());
+            questionDto.getOptions().add(new OptionDto());
+            questionDto.getOptions().add(new OptionDto());
+        }
+
         model.addAttribute("questionDto", questionDto);
         model.addAttribute("quizId", questionDto.getQuizId());
         return "admin/questions/edit";
@@ -59,11 +76,25 @@ public class QuestionUiController {
             @ModelAttribute QuestionDto questionDto,
             Model model) {
         try {
+            // Ensure options list is never null
+            if (questionDto.getOptions() == null) {
+                questionDto.setOptions(new ArrayList<>());
+            }
+
+            // Validate at least one option is marked as correct
+            boolean hasCorrectOption = questionDto.getOptions().stream()
+                    .anyMatch(OptionDto::isCorrect);
+
+            if (!hasCorrectOption) {
+                throw new IllegalArgumentException("At least one option must be marked as correct");
+            }
+
             QuestionDto updatedQuestion = questionService.updateQuestion(id, questionDto);
             return "redirect:/ui/admin/quizzes/" + questionDto.getQuizId() + "/questions";
         } catch (Exception e) {
             model.addAttribute("error", "Failed to update question: " + e.getMessage());
             model.addAttribute("questionDto", questionDto);
+            model.addAttribute("quizId", questionDto.getQuizId());
             return "admin/questions/edit";
         }
     }

@@ -2,8 +2,13 @@ package com.infobyte.task.project.services.impl;
 
 import com.infobyte.task.project.dtos.QuizDto;
 import com.infobyte.task.project.entities.Quiz;
+import com.infobyte.task.project.entities.QuizAttempt;
+import com.infobyte.task.project.repositories.QuestionRepository;
+import com.infobyte.task.project.repositories.QuizAttemptRepository;
 import com.infobyte.task.project.repositories.QuizRepository;
+import com.infobyte.task.project.repositories.UserAnswerRepository;
 import com.infobyte.task.project.services.QuizService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -16,6 +21,9 @@ import java.util.stream.Collectors;
 public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
+    private final QuestionRepository questionRepository;
+    private final QuizAttemptRepository quizAttemptRepository;
+    private final UserAnswerRepository userAnswerRepository;
     private final ModelMapper mapper;
 
     @Override
@@ -38,8 +46,21 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public void deleteQuiz(Long id) {
-        quizRepository.deleteById(id);
+    @Transactional
+    public void deleteQuiz(Long quizId) {
+        // 1. Find all quiz attempts for this quiz
+        List<QuizAttempt> attempts = quizAttemptRepository.findByQuizId(quizId);
+
+        // 2. For each attempt, delete its user answers
+        attempts.forEach(attempt -> {
+            userAnswerRepository.deleteByQuizAttemptId(attempt.getId());
+        });
+
+        // 3. Delete all quiz attempts
+        quizAttemptRepository.deleteByQuizId(quizId);
+
+        // 4. Delete the quiz (which will cascade to questions and options)
+        quizRepository.deleteById(quizId);
     }
 
     @Override

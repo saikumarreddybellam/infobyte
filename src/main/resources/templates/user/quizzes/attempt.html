@@ -4,6 +4,46 @@
   <meta charset="UTF-8">
   <title th:text="${quiz.title} + ' Quiz'"></title>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <style>
+    .card {
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+      margin-bottom: 1rem;
+    }
+    .card-header {
+      background-color: #f8f9fa;
+      padding: 0.75rem 1.25rem;
+    }
+    .form-check-input:checked {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+    }
+    .feedback-correct {
+      color: #198754;
+      font-weight: bold;
+    }
+    .feedback-incorrect {
+      color: #dc3545;
+      font-weight: bold;
+    }
+    .progress-container {
+      margin-bottom: 2rem;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+    }
+    .correct-answer {
+      background-color: #d4edda;
+    }
+    .question-container {
+      display: none;
+    }
+    .question-container.active {
+      display: block;
+    }
+  </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -12,6 +52,7 @@
     <div class="navbar-nav ms-auto">
       <span class="navbar-text me-3" th:text="'Welcome, ' + ${#authentication.name}"></span>
       <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <button type="submit" class="btn btn-outline-light">Logout</button>
       </form>
     </div>
@@ -19,32 +60,146 @@
 </nav>
 
 <div class="container mt-4">
-  <h2 th:text="${quiz.title}"></h2>
-  <p class="lead" th:text="${quiz.description}"></p>
-  <a th:href="@{/ui/user/quizzes}" class="btn btn-secondary mb-3">Back to Quizzes</a>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-  <form th:action="@{/ui/user/quizzes/{id}/attempt(id=${quiz.id})}" method="post">
-    <div th:each="question, iter : ${quiz.questions}" class="card mb-3">
-      <div class="card-header">
-        <h5 th:text="${iter.count} + '. ' + ${question.questionText}"></h5>
-      </div>
-      <div class="card-body">
-        <div th:each="option : ${question.options}" class="form-check mb-2">
-          <input class="form-check-input" type="radio"
-                 th:name="answers[${iter.index}].questionId"
-                 th:value="${question.id}" hidden checked>
-          <input class="form-check-input" type="radio"
-                 th:name="answers[${iter.index}].selectedOptionId"
-                 th:value="${option.id}"
-                 th:id="'option_' + ${option.id}"
-                 required>
-          <label class="form-check-label" th:for="'option_' + ${option.id}"
-                 th:text="${option.text}"></label>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 th:text="${quiz.title}"></h2>
+    <div>
+      <span id="question-counter" class="badge bg-primary">Question 1 of <span th:text="${quiz.questions.size()}"></span></span>
+      <a th:href="@{/ui/user/quizzes}" class="btn btn-secondary ms-2">Exit Quiz</a>
+    </div>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress">
+      <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+  </div>
+
+  <form th:action="@{/ui/user/quizzes/{id}/attempt(id=${quiz.id})}" method="post" id="quizForm">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <div th:each="question, qStat : ${quiz.questions}" class="question-container" id="question-__${qStat.index}__">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0" th:text="${qStat.count} + '. ' + ${question.questionText}"></h5>
+        </div>
+        <div class="card-body">
+          <input type="hidden" th:name="answers[__${qStat.index}__].questionId" th:value="${question.id}"/>
+
+          <div th:each="option : ${question.options}" class="form-check mb-2">
+            <input class="form-check-input" type="radio"
+                   th:name="answers[__${qStat.index}__].selectedOptionId"
+                   th:value="${option.id}"
+                   th:id="${'q' + question.id + '_option_' + option.id}"
+                   th:data-correct="${option.correct}"
+                   required>
+            <label class="form-check-label"
+                   th:for="${'q' + question.id + '_option_' + option.id}"
+                   th:text="${option.text}"></label>
+          </div>
         </div>
       </div>
+
+      <div class="nav-buttons">
+        <button type="button" class="btn btn-secondary prev-btn" th:if="${not qStat.first}">Previous</button>
+        <div th:unless="${not qStat.first}"></div>
+
+        <button type="button" class="btn btn-primary next-btn" th:unless="${qStat.last}">Next</button>
+        <button type="submit" class="btn btn-success" th:if="${qStat.last}">Submit Quiz</button>
+      </div>
     </div>
-    <button type="submit" class="btn btn-primary btn-lg">Submit Quiz</button>
   </form>
 </div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const questionContainers = document.querySelectorAll('.question-container');
+    const progressBar = document.getElementById('progress-bar');
+    const questionCounter = document.getElementById('question-counter');
+    let currentQuestion = 0;
+
+    // Initialize first question
+    showQuestion(currentQuestion);
+    updateProgress();
+
+    // Next button click handler
+    document.querySelectorAll('.next-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (validateCurrentQuestion()) {
+          currentQuestion++;
+          showQuestion(currentQuestion);
+          updateProgress();
+        }
+      });
+    });
+
+    // Previous button click handler
+    document.querySelectorAll('.prev-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        currentQuestion--;
+        showQuestion(currentQuestion);
+        updateProgress();
+      });
+    });
+
+    function showQuestion(index) {
+      questionContainers.forEach((container, i) => {
+        if (i === index) {
+          container.classList.add('active');
+        } else {
+          container.classList.remove('active');
+        }
+      });
+
+      // Update question counter
+      questionCounter.textContent = `Question ${index + 1} of ${questionContainers.length}`;
+    }
+
+    function updateProgress() {
+      const progress = ((currentQuestion + 1) / questionContainers.length) * 100;
+      progressBar.style.width = `${progress}%`;
+      progressBar.setAttribute('aria-valuenow', progress);
+    }
+
+    function validateCurrentQuestion() {
+      const currentContainer = questionContainers[currentQuestion];
+      const radioButtons = currentContainer.querySelectorAll('input[type="radio"]');
+      const isAnswered = Array.from(radioButtons).some(radio => radio.checked);
+
+      if (!isAnswered) {
+        alert('Please select an answer before proceeding');
+        return false;
+      }
+
+      // Show feedback for the selected answer
+      const selectedRadio = currentContainer.querySelector('input[type="radio"]:checked');
+      if (selectedRadio) {
+        const isCorrect = selectedRadio.dataset.correct === 'true';
+        const feedback = document.createElement('div');
+        feedback.className = isCorrect ? 'feedback-correct mt-3' : 'feedback-incorrect mt-3';
+        feedback.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
+
+        // Remove previous feedback if any
+        const oldFeedback = currentContainer.querySelector('.feedback-correct, .feedback-incorrect');
+        if (oldFeedback) oldFeedback.remove();
+
+        currentContainer.querySelector('.card-body').appendChild(feedback);
+
+        // Highlight correct answer if wrong was selected
+        if (!isCorrect) {
+          const correctRadio = currentContainer.querySelector('input[data-correct="true"]');
+          if (correctRadio) {
+            const correctLabel = correctRadio.nextElementSibling;
+            correctLabel.classList.add('text-success', 'fw-bold');
+          }
+        }
+      }
+
+      return true;
+    }
+  });
+</script>
 </body>
 </html>

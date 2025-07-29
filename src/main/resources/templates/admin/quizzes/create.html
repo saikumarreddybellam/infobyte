@@ -2,61 +2,47 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title th:text="${quizDto.id != null} ? 'Edit Quiz' : 'Create Quiz'"></title>
+  <title>Create Quiz</title>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand" th:href="@{/ui/dashboard}">Quiz App</a>
-    <div class="navbar-nav ms-auto">
-      <span class="navbar-text me-3" th:text="'Welcome, ' + ${#authentication.name}"></span>
-      <form th:action="@{/logout}" method="post">
-        <button type="submit" class="btn btn-outline-light">Logout</button>
-      </form>
-    </div>
-  </div>
+  <!-- Same navbar as your list page -->
 </nav>
 
 <div class="container mt-4">
-  <h2 th:text="${quizDto.id != null} ? 'Edit Quiz' : 'Create Quiz'"></h2>
-  <a th:href="@{/ui/admin/quizzes}" class="btn btn-secondary mb-3">Back to Quizzes</a>
+  <h2>Create New Quiz</h2>
 
-  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-  <form th:action="${quizDto.id != null} ? @{/ui/admin/quizzes/{id}(id=${quizDto.id})} : @{/ui/admin/quizzes}"
-        method="post">
-    <input type="hidden" th:field="*{quizDto.id}">
-
+  <form th:action="@{/ui/admin/quizzes}" th:object="${quizDto}" method="post">
     <div class="mb-3">
       <label for="title" class="form-label">Title</label>
-      <input type="text" class="form-control" id="title" th:field="*{quizDto.title}" required>
+      <input type="text" class="form-control" id="title" th:field="*{title}" required>
     </div>
 
     <div class="mb-3">
       <label for="description" class="form-label">Description</label>
-      <textarea class="form-control" id="description" th:field="*{quizDto.description}" rows="3"></textarea>
+      <textarea class="form-control" id="description" th:field="*{description}" rows="3"></textarea>
     </div>
 
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <label for="topic" class="form-label">Topic</label>
-        <input type="text" class="form-control" id="topic" th:field="*{quizDto.topic}" required>
-      </div>
-      <div class="col-md-6 mb-3">
-        <label for="difficulty" class="form-label">Difficulty</label>
-        <select class="form-select" id="difficulty" th:field="*{quizDto.difficulty}">
-          <option value="EASY">Easy</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="HARD">Hard</option>
-        </select>
-      </div>
+    <div class="mb-3">
+      <label for="topic" class="form-label">Topic</label>
+      <input type="text" class="form-control" id="topic" th:field="*{topic}">
     </div>
 
-    <button type="submit" class="btn btn-primary">
-      <span th:text="${quizDto.id != null} ? 'Update' : 'Create'"></span> Quiz
-    </button>
+    <div class="mb-3">
+      <label for="difficulty" class="form-label">Difficulty</label>
+      <select class="form-select" id="difficulty" th:field="*{difficulty}">
+        <option value="EASY">Easy</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="HARD">Hard</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Quiz</button>
+    <a th:href="@{/ui/admin/quizzes}" class="btn btn-secondary">Cancel</a>
   </form>
 </div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -37,12 +37,14 @@ public class AuthUiController {
         try {
             LoginResponse loginResponse = authService.login(request);
 
-            // Option 1: Store token in cookie (recommended for browser-based auth)
+            // Set cookie
             Cookie cookie = new Cookie("AUTH_TOKEN", loginResponse.getToken());
             cookie.setHttpOnly(true);
             cookie.setPath("/");
+            cookie.setMaxAge(60 * 60 * 24); // 1 day
             response.addCookie(cookie);
 
+            redirectAttributes.addFlashAttribute("username", request.getUsername());
             return "redirect:/ui/dashboard";
         } catch (Exception e) {
             model.addAttribute("error", "Invalid credentials");

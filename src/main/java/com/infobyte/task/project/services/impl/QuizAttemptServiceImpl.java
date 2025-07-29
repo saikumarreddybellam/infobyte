@@ -44,6 +44,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                         q.getId(),
                         q.getTitle(),
                         q.getTopic(),
+                        q.getDescription(),
                         q.getDifficulty(),
                         q.getQuestions().size()))
                 .collect(Collectors.toList());

@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
     List<UserAnswer> findByQuizAttemptId(Long attemptId);
+
+    void deleteByQuizAttemptId(Long id);
 }
