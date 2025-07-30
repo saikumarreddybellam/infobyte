@@ -13,4 +13,6 @@ public interface QuizAttemptService {
     QuizDto getQuizForUser(Long quizId);
     QuizResultDto evaluateQuiz(Long quizId, QuizSubmissionDto submission, String username);
     List<QuizAttemptDto> getUserAttempts(String username);
+
+    QuizResultDto getQuizResult(Long attemptId, String name);
 }

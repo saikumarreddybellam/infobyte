@@ -1,6 +1,5 @@
 package com.infobyte.task.project.controllers.ui;
 
-import com.infobyte.task.project.dtos.OptionDto;
 import com.infobyte.task.project.dtos.QuestionDto;
 import com.infobyte.task.project.dtos.QuizDto;
 import com.infobyte.task.project.services.QuestionService;
@@ -11,14 +10,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/ui/admin/quizzes")
@@ -77,22 +75,38 @@ public class QuizUiController {
     public String showCreateQuestionForm(@PathVariable Long quizId, Model model) {
         QuestionDto questionDto = new QuestionDto();
         questionDto.setQuizId(quizId);
-
-        // Initialize with empty options
-        List<OptionDto> options = new ArrayList<>();
-        options.add(new OptionDto());
-        options.add(new OptionDto());
-        options.add(new OptionDto());
-        options.add(new OptionDto());
-        questionDto.setOptions(options);
-
         model.addAttribute("questionDto", questionDto);
         model.addAttribute("quizId", quizId);
         return "admin/questions/create";
     }
 
     @PostMapping("/{quizId}/questions")
-    public String createQuestion(@PathVariable Long quizId, @ModelAttribute QuestionDto questionDto) {
+    public String createQuestion(
+            @PathVariable Long quizId,
+            @ModelAttribute QuestionDto questionDto,
+            @RequestParam("correctOption") int correctOptionIndex,
+            BindingResult bindingResult,
+            Model model) {
+
+        // Validate correct option index
+        if (correctOptionIndex < 0 || correctOptionIndex >= questionDto.getOptions().size()) {
+            bindingResult.rejectValue("options", "invalid.correctOption", "Please select a valid correct option");
+        }
+
+        // Validate at least 2 options exist
+        if (questionDto.getOptions() == null || questionDto.getOptions().size() < 2) {
+            bindingResult.rejectValue("options", "size.min", "At least 2 options are required");
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("quizId", quizId);
+            return "admin/questions/create";
+        }
+
+        // Mark the correct option
+        questionDto.getOptions().forEach(option -> option.setCorrect(false));
+        questionDto.getOptions().get(correctOptionIndex).setCorrect(true);
+
         questionService.addQuestionToQuiz(quizId, questionDto);
         return "redirect:/ui/admin/quizzes/" + quizId + "/questions";
     }

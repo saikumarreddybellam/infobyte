@@ -136,11 +136,47 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .map(attempt -> {
                     QuizAttemptDto dto = new QuizAttemptDto();
                     dto.setAttemptId(attempt.getId());
+                    dto.setQuizId(attempt.getQuiz().getId());  // Add this line
                     dto.setQuizTitle(attempt.getQuiz().getTitle());
                     dto.setAttemptedOn(attempt.getAttemptTime());
                     dto.setScore(attempt.getScore());
                     dto.setTotalQuestions(attempt.getUserAnswers().size());
                     return dto;
                 }).collect(Collectors.toList());
+    }
+
+    @Override
+    public QuizResultDto getQuizResult(Long attemptId, String username) {
+        QuizAttempt attempt = quizAttemptRepository.findById(attemptId)
+                .orElseThrow(() -> new RuntimeException("Quiz attempt not found"));
+
+        // Verify the attempt belongs to the requesting user
+        if (!attempt.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Unauthorized access to quiz attempt");
+        }
+
+        List<QuizResultDto.Feedback> feedbackList = new ArrayList<>();
+
+        for (UserAnswer ua : attempt.getUserAnswers()) {
+            Question question = ua.getQuestion();
+            Option selected = ua.getSelectedOption();
+
+            feedbackList.add(new QuizResultDto.Feedback(
+                    question.getQuestionText(),
+                    selected.getText(),
+                    question.getOptions().stream()
+                            .filter(Option::isCorrect)
+                            .findFirst()
+                            .map(Option::getText)
+                            .orElse(""),
+                    ua.isCorrect()
+            ));
+        }
+
+        return new QuizResultDto(
+                attempt.getScore(),
+                attempt.getUserAnswers().size(),
+                feedbackList
+        );
     }
 }

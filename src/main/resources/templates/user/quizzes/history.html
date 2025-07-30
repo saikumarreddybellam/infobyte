@@ -2,8 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Your Quiz History</title>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <style>
+    .score-high { background-color: #d4edda; }
+    .score-medium { background-color: #fff3cd; }
+    .score-low { background-color: #f8d7da; }
+  </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -22,27 +28,43 @@
   <h2>Your Quiz Attempts</h2>
   <a th:href="@{/ui/dashboard}" class="btn btn-secondary mb-3">Back to Dashboard</a>
 
-  <div th:if="${#lists.isEmpty(attempts)}" class="alert alert-info">
-    You haven't attempted any quizzes yet.
+  <!-- No attempts -->
+  <div th:if="${attempts == null or #lists.isEmpty(attempts)}" class="alert alert-info">
+    <span th:if="${attempts == null}">Unable to load quiz history.</span>
+    <span th:if="${attempts != null}">You haven't attempted any quizzes yet.</span>
   </div>
 
-  <div class="list-group">
+  <!-- Attempt list -->
+  <div th:if="${attempts != null and not #lists.isEmpty(attempts)}" class="list-group">
     <div th:each="attempt : ${attempts}" class="list-group-item">
       <div class="d-flex justify-content-between align-items-center">
         <div>
-          <h5 th:text="${attempt.quizTitle}"></h5>
-          <small class="text-muted"
+          <h5 th:text="${attempt.quizTitle != null} ? ${attempt.quizTitle} : 'Untitled Quiz'"></h5>
+
+          <!-- Display formatted date safely -->
+          <small class="text-muted" th:if="${attempt.attemptedOn != null}"
                  th:text="${#temporals.format(attempt.attemptedOn, 'yyyy-MM-dd HH:mm')}"></small>
+          <small class="text-muted" th:unless="${attempt.attemptedOn != null}">
+            Date not available
+          </small>
         </div>
         <div>
-                    <span class="badge bg-primary rounded-pill"
-                          th:text="${attempt.score} + '/' + ${attempt.totalQuestions}"></span>
-          <a th:href="@{/ui/user/quizzes/{quizId}/result/{attemptId}(quizId=${attempt.quizId}, attemptId=${attempt.attemptId})}"
+          <span class="badge bg-secondary rounded-pill"
+                th:text="'Score: ' + ${attempt.score} + '/' + ${attempt.totalQuestions}">
+          </span>
+
+          <a th:if="${attempt.quizId != null and attempt.attemptId != null}"
+             th:href="@{/ui/user/quizzes/{quizId}/result/{attemptId}(quizId=${attempt.quizId}, attemptId=${attempt.attemptId})}"
              class="btn btn-sm btn-info ms-2">View Details</a>
+
+          <span th:if="${attempt.quizId == null or attempt.attemptId == null}"
+                class="badge bg-secondary ms-2">Details unavailable</span>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

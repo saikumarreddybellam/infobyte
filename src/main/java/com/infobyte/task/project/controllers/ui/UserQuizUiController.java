@@ -58,4 +58,12 @@ public class UserQuizUiController {
                 quizAttemptService.getUserAttempts(authentication.getName()));
         return "user/quizzes/history";
     }
+
+    @GetMapping("{quizId}/result/{attemptId}")
+    public String showQuizResult(@PathVariable Long attemptId, @PathVariable Long quizId,Authentication authentication, Model model) {
+        QuizResultDto result = quizAttemptService.getQuizResult(attemptId, authentication.getName());
+        model.addAttribute("result", result);
+        model.addAttribute("quizId", quizId);
+        return "user/quizzes/result";
+    }
 }

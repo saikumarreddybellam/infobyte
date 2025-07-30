@@ -4,10 +4,12 @@ import com.infobyte.task.project.dtos.OptionDto;
 import com.infobyte.task.project.dtos.QuestionDto;
 import com.infobyte.task.project.services.QuestionService;
 import com.infobyte.task.project.services.QuizService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,14 +59,6 @@ public class QuestionUiController {
             questionDto.setOptions(new ArrayList<>());
         }
 
-        // If no options exist, initialize with 2 empty options (like create form)
-        if (questionDto.getOptions().isEmpty()) {
-            questionDto.getOptions().add(new OptionDto());
-            questionDto.getOptions().add(new OptionDto());
-            questionDto.getOptions().add(new OptionDto());
-            questionDto.getOptions().add(new OptionDto());
-        }
-
         model.addAttribute("questionDto", questionDto);
         model.addAttribute("quizId", questionDto.getQuizId());
         return "admin/questions/edit";
@@ -73,12 +67,14 @@ public class QuestionUiController {
     @PostMapping("/{id}/update")
     public String updateQuestion(
             @PathVariable Long id,
-            @ModelAttribute QuestionDto questionDto,
+            @ModelAttribute @Valid QuestionDto questionDto,
+            BindingResult bindingResult,
             Model model) {
         try {
             // Ensure options list is never null
             if (questionDto.getOptions() == null) {
                 questionDto.setOptions(new ArrayList<>());
+                bindingResult.rejectValue("options", "NotEmpty", "At least 2 options are required");
             }
 
             // Validate at least one option is marked as correct
@@ -86,7 +82,13 @@ public class QuestionUiController {
                     .anyMatch(OptionDto::isCorrect);
 
             if (!hasCorrectOption) {
-                throw new IllegalArgumentException("At least one option must be marked as correct");
+                bindingResult.rejectValue("options", "CorrectOptionRequired", "At least one option must be marked as correct");
+            }
+
+            if (bindingResult.hasErrors()) {
+                model.addAttribute("questionDto", questionDto);
+                model.addAttribute("quizId", questionDto.getQuizId());
+                return "admin/questions/edit";
             }
 
             QuestionDto updatedQuestion = questionService.updateQuestion(id, questionDto);

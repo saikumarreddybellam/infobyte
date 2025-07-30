@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Data
 public class QuizAttemptDto {
     private Long attemptId;
+    private Long quizId;
     private String quizTitle;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
