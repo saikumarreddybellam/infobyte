@@ -54,7 +54,6 @@ public class QuestionUiController {
     public String showEditQuestionForm(@PathVariable Long id, Model model) {
         QuestionDto questionDto = questionService.getQuestionById(id);
 
-        // Ensure options list is never null
         if (questionDto.getOptions() == null) {
             questionDto.setOptions(new ArrayList<>());
         }
@@ -71,13 +70,11 @@ public class QuestionUiController {
             BindingResult bindingResult,
             Model model) {
         try {
-            // Ensure options list is never null
             if (questionDto.getOptions() == null) {
                 questionDto.setOptions(new ArrayList<>());
                 bindingResult.rejectValue("options", "NotEmpty", "At least 2 options are required");
             }
 
-            // Validate at least one option is marked as correct
             boolean hasCorrectOption = questionDto.getOptions().stream()
                     .anyMatch(OptionDto::isCorrect);
 

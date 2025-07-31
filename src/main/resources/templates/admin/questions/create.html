@@ -1,68 +1,318 @@
-<form th:action="@{'/ui/admin/quizzes/' + ${quizId} + '/questions'}" method="post">
-    <input type="hidden" name="quizId" th:value="${quizId}">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Question</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #f8f9fc;
+            --success-color: #1cc88a;
+        }
 
-    <div class="mb-3">
-        <label for="questionText" class="form-label">Question Text</label>
-        <textarea class="form-control" id="questionText" name="questionText" rows="3" required></textarea>
+        body {
+            background-color: var(--secondary-color);
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .main-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e3e6f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .option-card {
+            transition: all 0.2s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .option-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .correct-option-radio {
+            width: 1.2em;
+            height: 1.2em;
+            margin-top: 0.1em;
+            accent-color: var(--success-color);
+        }
+
+        .form-control:focus, .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+            border-color: var(--primary-color);
+        }
+
+        #submit-btn {
+            transition: all 0.2s ease;
+            min-width: 120px;
+        }
+
+        #submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(78, 115, 223, 0.25);
+        }
+
+        #add-option-btn {
+            transition: all 0.2s ease;
+        }
+
+        #add-option-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .form-label {
+            font-weight: 500;
+        }
+
+        .floating-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(30deg);
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title">Create New Question</h2>
+        <i class="bi bi-brightness-high-fill theme-toggle fs-4" id="theme-toggle" title="Toggle dark mode"></i>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Answer Options</label>
-        <div id="options-container">
-            <!-- Initial two options -->
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">Option 1</label>
-                        <input type="text" class="form-control" name="options[0].text" required>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="correctOption" value="0" required>
-                        <label class="form-check-label">Correct Answer</label>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">Option 2</label>
-                        <input type="text" class="form-control" name="options[1].text" required>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="correctOption" value="1">
-                        <label class="form-check-label">Correct Answer</label>
-                    </div>
-                </div>
-            </div>
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle-fill me-2"></i>
+        Add a new question to your quiz. Provide at least 2 answer options and mark the correct one.
+    </div>
+
+    <form th:action="@{'/ui/admin/quizzes/' + ${quizId} + '/questions'}" method="post">
+        <input type="hidden" name="quizId" th:value="${quizId}">
+
+        <div class="mb-4">
+            <label for="questionText" class="form-label fw-semibold">Question Text</label>
+            <textarea class="form-control focus-ring" id="questionText" name="questionText" rows="4" required
+                      placeholder="Enter your question here..."></textarea>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOption()">
-            <i class="bi bi-plus"></i> Add Option
-        </button>
-    </div>
 
-    <button type="submit" class="btn btn-primary">Save Question</button>
-</form>
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label fw-semibold">Answer Options</label>
+                <span class="badge bg-primary rounded-pill" id="option-count">2 options</span>
+            </div>
 
+            <div id="options-container" class="mb-3">
+                <!-- Initial two options -->
+                <div class="card mb-3 option-card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Option 1</label>
+                            <input type="text" class="form-control" name="options[0].text" required
+                                   placeholder="Enter option text">
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input correct-option-radio" type="radio" name="correctOption" value="0" required>
+                            <label class="form-check-label">Correct Answer</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3 option-card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Option 2</label>
+                            <input type="text" class="form-control" name="options[1].text" required
+                                   placeholder="Enter option text">
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input correct-option-radio" type="radio" name="correctOption" value="1">
+                            <label class="form-check-label">Correct Answer</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center">
+                <button type="button" class="btn btn-outline-primary me-3" id="add-option-btn" onclick="addOption()">
+                    <i class="bi bi-plus-circle"></i> Add Option
+                </button>
+                <button type="button" class="btn btn-outline-danger" id="remove-option-btn" onclick="removeOption()" disabled>
+                    <i class="bi bi-dash-circle"></i> Remove Option
+                </button>
+            </div>
+            <small class="text-muted mt-2 d-block">Minimum 2 options required</small>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-5">
+            <a href="#" class="btn btn-outline-secondary" onclick="history.back()">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+            <button type="submit" class="btn btn-primary px-4" id="submit-btn">
+                <span class="submit-text">Save Question</span>
+                <span class="spinner-border spinner-border-sm d-none" id="submit-spinner"></span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="floating-alert alert alert-success" id="success-alert">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    Question saved successfully!
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     let optionCount = 2;
+    const minOptions = 2;
+    const maxOptions = 6;
+
+    function updateOptionCount() {
+        document.getElementById('option-count').textContent = `${optionCount} option${optionCount !== 1 ? 's' : ''}`;
+        document.getElementById('remove-option-btn').disabled = optionCount <= minOptions;
+        document.getElementById('add-option-btn').disabled = optionCount >= maxOptions;
+    }
 
     function addOption() {
+        if (optionCount >= maxOptions) return;
+
         const container = document.getElementById('options-container');
         const newOption = document.createElement('div');
-        newOption.className = 'card mb-3';
+        newOption.className = 'card mb-3 option-card';
         newOption.innerHTML = `
             <div class="card-body">
                 <div class="mb-3">
                     <label class="form-label">Option ${optionCount + 1}</label>
-                    <input type="text" class="form-control" name="options[${optionCount}].text" required>
+                    <input type="text" class="form-control" name="options[${optionCount}].text" required
+                           placeholder="Enter option text">
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="correctOption" value="${optionCount}">
+                    <input class="form-check-input correct-option-radio" type="radio" name="correctOption" value="${optionCount}">
                     <label class="form-check-label">Correct Answer</label>
                 </div>
             </div>
         `;
+
+        newOption.style.opacity = '0';
         container.appendChild(newOption);
+
+        setTimeout(() => {
+            newOption.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            newOption.style.opacity = '1';
+        }, 10);
+
         optionCount++;
+        updateOptionCount();
+
+        newOption.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        if (optionCount >= maxOptions) {
+            showAlert('Maximum 6 options allowed', 'info');
+        }
     }
+
+    function removeOption() {
+        if (optionCount <= minOptions) return;
+
+        const container = document.getElementById('options-container');
+        const lastOption = container.lastElementChild;
+
+        lastOption.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        lastOption.style.opacity = '0';
+        lastOption.style.transform = 'translateX(100px)';
+
+        setTimeout(() => {
+            container.removeChild(lastOption);
+            optionCount--;
+            updateOptionCount();
+        }, 300);
+    }
+
+    function showAlert(message, type) {
+        const alert = document.createElement('div');
+        alert.className = `floating-alert alert alert-${type}`;
+        alert.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'}-fill me-2"></i>${message}`;
+        document.body.appendChild(alert);
+
+        setTimeout(() => {
+            alert.style.opacity = '1';
+        }, 10);
+
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(alert);
+            }, 500);
+        }, 3000);
+    }
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const submitBtn = document.getElementById('submit-btn');
+        const spinner = document.getElementById('submit-spinner');
+        const submitText = submitBtn.querySelector('.submit-text');
+
+        if (!document.querySelector('input[name="correctOption"]:checked')) {
+            e.preventDefault();
+            showAlert('Please select the correct answer', 'danger');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        spinner.classList.remove('d-none');
+        submitText.textContent = 'Saving...';
+
+        setTimeout(() => {
+            showAlert('Question saved successfully!', 'success');
+            // In a real app, you would handle the form submission response here
+        }, 1500);
+    });
+
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute('data-bs-theme') === 'dark';
+
+        html.setAttribute('data-bs-theme', isDark ? 'light' : 'dark');
+        this.classList.toggle('bi-brightness-high-fill');
+        this.classList.toggle('bi-moon-fill');
+
+        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    });
+
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
+
+        const toggle = document.getElementById('theme-toggle');
+        toggle.classList.toggle('bi-moon-fill', savedTheme === 'dark');
+        toggle.classList.toggle('bi-brightness-high-fill', savedTheme === 'light');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initTheme();
+        updateOptionCount();
+    });
 </script>
+</body>
+</html>

@@ -10,5 +10,5 @@ public class ProfileUpdateRequest {
 
     private String confirmPassword;
 
-    private String email; // Optional if you want to allow email updates
+    private String email;
 }

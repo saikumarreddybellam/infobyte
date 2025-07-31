@@ -31,7 +31,7 @@ public class Quiz {
 
     private String topic;
 
-    private String difficulty; // EASY, MEDIUM, HARD (optional)
+    private String difficulty;
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions = new ArrayList<>();

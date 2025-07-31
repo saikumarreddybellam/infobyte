@@ -4,6 +4,70 @@
   <meta charset="UTF-8">
   <title>Quiz Results</title>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .navbar {
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+    .card-header {
+      border-radius: 10px 10px 0 0 !important;
+    }
+    .score-display {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .percentage {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    .btn {
+      transition: all 0.3s ease;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-weight: 500;
+    }
+    .btn-primary {
+      background-color: #4361ee;
+      border-color: #4361ee;
+    }
+    .btn-info {
+      background-color: #3a86ff;
+      border-color: #3a86ff;
+    }
+    .feedback-card {
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    .progress {
+      height: 10px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      background-color: #4361ee;
+    }
+    .alert {
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -18,33 +82,70 @@
   </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container mt-4 animate__animated animate__fadeIn">
   <div class="card mb-4">
     <div class="card-header bg-primary text-white">
       <h3>Quiz Results</h3>
     </div>
     <div class="card-body">
-      <h4 class="card-title">
+      <div class="progress">
+        <div class="progress-bar" role="progressbar" th:attr="aria-valuenow=${result.score/result.totalQuestions*100}, aria-valuemin=0, aria-valuemax=100" th:style="'width: ' + ${result.score/result.totalQuestions*100} + '%;'"></div>
+      </div>
+      <h4 class="card-title score-display">
         Score: <span th:text="${result.score} + '/' + ${result.totalQuestions}"></span>
-        (<span th:text="${#numbers.formatDecimal(result.score/result.totalQuestions*100, 1, 2)} + '%'"></span>)
+        (<span class="percentage" th:text="${#numbers.formatDecimal(result.score/result.totalQuestions*100, 1, 2)} + '%'"></span>)
       </h4>
-      <a th:href="@{/ui/user/quizzes}" class="btn btn-primary">Take Another Quiz</a>
-      <a th:href="@{/ui/leaderboard/quiz/{id}(id=${quizId})}" class="btn btn-info">View Leaderboard</a>
+      <div class="d-flex gap-3 mt-4">
+        <a th:href="@{/ui/user/quizzes}" class="btn btn-primary">Take Another Quiz</a>
+        <a th:href="@{/ui/leaderboard/quiz/{id}(id=${quizId})}" class="btn btn-info">View Leaderboard</a>
+      </div>
     </div>
   </div>
 
-  <h4>Question Feedback</h4>
-  <div th:each="feedback, iter : ${result.feedback}" class="card mb-2">
+  <h4 class="mb-3">Question Feedback</h4>
+  <div th:each="feedback, iter : ${result.feedback}" class="card mb-3 feedback-card" th:style="'animation-delay: ' + ${iter.index * 0.1} + 's'">
     <div class="card-header" th:text="${iter.count} + '. ' + ${feedback.question}"></div>
     <div class="card-body">
       <p>Your answer: <span th:text="${feedback.selectedAnswer}"
-                            th:class="${feedback.correct} ? 'text-success' : 'text-danger'"></span></p>
-      <p th:unless="${feedback.correct}">Correct answer: <span class="text-success" th:text="${feedback.correctAnswer}"></span></p>
+                            th:class="${feedback.correct} ? 'text-success fw-bold' : 'text-danger fw-bold'"></span></p>
+      <p th:unless="${feedback.correct}">Correct answer: <span class="text-success fw-bold" th:text="${feedback.correctAnswer}"></span></p>
       <div th:class="${feedback.correct} ? 'alert alert-success' : 'alert alert-danger'">
         <span th:text="${feedback.correct} ? 'Correct!' : 'Incorrect'"></span>
       </div>
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        const rect = button.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+
+        button.appendChild(ripple);
+
+        setTimeout(() => {
+          ripple.remove();
+        }, 1000);
+      });
+    });
+
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+      setTimeout(() => {
+        progressBar.style.transition = 'width 1.5s ease';
+      }, 300);
+    }
+  });
+</script>
 </body>
 </html>

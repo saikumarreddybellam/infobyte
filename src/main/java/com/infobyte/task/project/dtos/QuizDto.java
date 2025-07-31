@@ -21,7 +21,7 @@ public class QuizDto {
     @NotBlank(message = "Topic is required")
     private String topic;
 
-    private String difficulty; // EASY, MEDIUM, HARD
+    private String difficulty;
 
     @NotNull(message = "Questions list cannot be null")
     private List<QuestionDto> questions = new ArrayList<>();

@@ -7,6 +7,138 @@
     <title>Edit Question</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #f8f9fc;
+            --success-color: #1cc88a;
+            --danger-color: #e74a3b;
+            --warning-color: #f6c23e;
+            --dark-color: #5a5c69;
+        }
+
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.2);
+        }
+
+        .card-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .option-card {
+            transition: all 0.2s ease;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #3a5bd9;
+            border-color: #3a5bd9;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .invalid-feedback {
+            color: var(--danger-color);
+        }
+
+        .alert-danger {
+            background-color: rgba(231, 74, 59, 0.1);
+            border-color: rgba(231, 74, 59, 0.2);
+            color: var(--danger-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease;
+        }
+
+        .floating-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .floating-btn:after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%, -50%);
+            transform-origin: 50% 50%;
+        }
+
+        .floating-btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -17,7 +149,9 @@
                 Welcome, <span sec:authentication="principal.username"></span>
             </span>
             <form th:action="@{/ui/auth/logout}" method="post" sec:authorize="isAuthenticated()">
-                <button type="submit" class="btn btn-outline-light">Logout</button>
+                <button type="submit" class="btn btn-outline-light floating-btn">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
             </form>
         </div>
     </div>
@@ -27,8 +161,9 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h3 class="mb-0">Edit Question</h3>
+                    <i class="bi bi-pencil-square" style="font-size: 1.5rem;"></i>
                 </div>
                 <div class="card-body">
                     <form th:action="@{/ui/admin/questions/{id}/update(id=${questionDto.id})}"
@@ -37,12 +172,12 @@
                         <input type="hidden" th:field="*{id}"/>
                         <input type="hidden" th:field="*{quizId}"/>
 
-                        <!-- Question Text Field -->
-                        <div class="mb-3">
-                            <label for="questionText" class="form-label">Question Text</label>
-                            <input type="text" class="form-control"
+                        <div class="mb-4">
+                            <label for="questionText" class="form-label fw-bold">Question Text</label>
+                            <input type="text" class="form-control form-control-lg"
                                    id="questionText"
                                    th:field="*{questionText}"
+                                   placeholder="Enter your question here"
                                    required>
                             <div th:if="${#fields.hasErrors('questionText')}"
                                  class="invalid-feedback d-block"
@@ -50,12 +185,10 @@
                             </div>
                         </div>
 
-                        <!-- Options Section -->
-                        <div class="mb-3">
-                            <label class="form-label">Answer Options</label>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Answer Options</label>
 
-                            <!-- Global Options Error -->
-                            <div th:if="${#fields.hasErrors('options')}" class="alert alert-danger">
+                            <div th:if="${#fields.hasErrors('options')}" class="alert alert-danger mb-3">
                                 <ul class="mb-0">
                                     <li th:each="err : ${#fields.errors('options')}" th:text="${err}"></li>
                                 </ul>
@@ -71,20 +204,21 @@
                                                    class="form-control"
                                                    th:name="|options[${iter.index}].text|"
                                                    th:value="${option.text}"
+                                                   placeholder="Enter option text"
                                                    required>
                                             <div th:if="${#fields.hasErrors('options[' + iter.index + '].text')}"
                                                  class="invalid-feedback d-block"
                                                  th:errors="*{options[__${iter.index}__].text}">
                                             </div>
                                         </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input"
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input correct-option-radio"
                                                    type="radio"
                                                    name="correctOptionIndex"
                                                    th:value="${iter.index}"
                                                    th:checked="${option.correct}"
                                                    required>
-                                            <label class="form-check-label">Correct Answer</label>
+                                            <label class="form-check-label fw-bold">Correct Answer</label>
                                         </div>
                                         <input type="hidden"
                                                th:name="|options[${iter.index}].id|"
@@ -99,20 +233,18 @@
                                 </div>
                             </div>
 
-                            <!-- Add Option Button -->
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addOption()">
-                                <i class="bi bi-plus"></i> Add Option
+                            <button type="button" class="btn btn-sm btn-outline-primary floating-btn mt-2" onclick="addOption()">
+                                <i class="bi bi-plus-circle"></i> Add Option
                             </button>
                         </div>
 
-                        <!-- Form Actions -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                             <a th:href="@{/ui/admin/quizzes/{quizId}/questions(quizId=${questionDto.quizId})}"
-                               class="btn btn-secondary me-md-2">
-                                Cancel
+                               class="btn btn-secondary me-md-2 floating-btn">
+                                <i class="bi bi-x-circle"></i> Cancel
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                Update Question
+                            <button type="submit" class="btn btn-primary floating-btn">
+                                <i class="bi bi-check-circle"></i> Update Question
                             </button>
                         </div>
                     </form>
@@ -131,7 +263,7 @@
     function addOption() {
         const container = document.getElementById('options-container');
         const newOption = document.createElement('div');
-        newOption.className = 'card mb-3 option-card';
+        newOption.className = 'card mb-3 option-card fade-in';
         newOption.innerHTML = `
             <div class="card-body">
                 <div class="mb-3">
@@ -139,14 +271,15 @@
                     <input type="text"
                            class="form-control"
                            name="options[${optionCount}].text"
+                           placeholder="Enter option text"
                            required>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input"
+                <div class="form-check mt-2">
+                    <input class="form-check-input correct-option-radio"
                            type="radio"
                            name="correctOptionIndex"
                            value="${optionCount}">
-                    <label class="form-check-label">Correct Answer</label>
+                    <label class="form-check-label fw-bold">Correct Answer</label>
                 </div>
                 <input type="hidden" name="options[${optionCount}].id" value="">
                 <input type="hidden" name="options[${optionCount}].questionId" value="${questionId}">
@@ -154,10 +287,17 @@
             </div>
         `;
         container.appendChild(newOption);
+
+        newOption.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        newOption.style.backgroundColor = 'rgba(78, 115, 223, 0.05)';
+        setTimeout(() => {
+            newOption.style.backgroundColor = '';
+        }, 1000);
+
         optionCount++;
     }
 
-    // Update correct flag when radio button is clicked
     document.addEventListener('change', function(e) {
         if (e.target && e.target.name === 'correctOptionIndex') {
             const optionCards = document.querySelectorAll('.option-card');
@@ -165,11 +305,35 @@
                 const correctInput = card.querySelector('input[name^="options"][name$="correct"]');
                 if (index == e.target.value) {
                     correctInput.value = 'true';
+                    card.classList.add('pulse');
+                    card.style.borderLeftColor = 'var(--success-color)';
+
+                    setTimeout(() => {
+                        card.classList.remove('pulse');
+                    }, 500);
                 } else {
                     correctInput.value = 'false';
+                    card.style.borderLeftColor = 'var(--primary-color)';
                 }
             });
         }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('options-container');
+        container.addEventListener('mouseover', function(e) {
+            const card = e.target.closest('.option-card');
+            if (card) {
+                card.style.boxShadow = '0 0.25rem 0.5rem rgba(0, 0, 0, 0.1)';
+            }
+        });
+
+        container.addEventListener('mouseout', function(e) {
+            const card = e.target.closest('.option-card');
+            if (card) {
+                card.style.boxShadow = '';
+            }
+        });
     });
     /*]]>*/
 </script>

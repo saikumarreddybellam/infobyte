@@ -30,18 +30,15 @@ public class QuestionServiceImpl implements QuestionService {
         Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new RuntimeException("Quiz not found"));
 
-        // Map the DTO to Question entity
         Question question = mapper.map(questionDto, Question.class);
         question.setQuiz(quiz);
 
-        // Ensure options are properly linked to the question
         if (question.getOptions() != null) {
             for (Option option : question.getOptions()) {
-                option.setQuestion(question);  // This is the crucial line
+                option.setQuestion(question);
             }
         }
 
-        // Save the question (options will be saved automatically due to cascade)
         Question savedQuestion = questionRepository.save(question);
 
         return mapper.map(savedQuestion, QuestionDto.class);

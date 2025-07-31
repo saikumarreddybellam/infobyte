@@ -14,12 +14,10 @@ public class ModelMapperConfig {
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
 
-        // Custom mapping for Quiz to QuizDto
         modelMapper.typeMap(Quiz.class, QuizDto.class).addMappings(mapper -> {
             mapper.map(Quiz::getQuestions, QuizDto::setQuestions);
         });
 
-        // Custom mapping for Question to QuestionDto
         modelMapper.typeMap(Question.class, QuestionDto.class).addMappings(mapper -> {
             mapper.map(Question::getOptions, QuestionDto::setOptions);
         });

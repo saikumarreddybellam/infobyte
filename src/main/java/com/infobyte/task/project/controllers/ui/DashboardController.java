@@ -21,13 +21,12 @@ public class DashboardController {
     public String showDashboard(Model model,
                                 @CookieValue(value = "AUTH_TOKEN", required = false) String token,
                                 Principal principal) {
-        // Check session authentication first
+
         if (principal != null) {
             model.addAttribute("username", principal.getName());
             return "dashboard";
         }
 
-        // Fall back to JWT token check
         if (token == null || !jwtTokenService.isTokenValid(token)) {
             return "redirect:/ui/auth/login";
         }

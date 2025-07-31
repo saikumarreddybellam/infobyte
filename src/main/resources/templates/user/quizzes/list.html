@@ -3,8 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <title>Available Quizzes</title>
-  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --dark-color: #1b263b;
+      --light-color: #f8f9fa;
+      --success-color: #4cc9f0;
+    }
+
+    body {
+      background-color: #f5f7fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .navbar {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(135deg, var(--dark-color), #2a3a5e) !important;
+    }
+
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      overflow: hidden;
+      background-color: white;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+      color: var(--dark-color);
+      font-weight: 600;
+    }
+
+    .badge {
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 20px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+      border-color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline-light:hover {
+      transform: translateY(-2px);
+    }
+
+    h2 {
+      color: var(--dark-color);
+      font-weight: 700;
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -10px;
+      width: 60px;
+      height: 4px;
+      background: var(--primary-color);
+      border-radius: 2px;
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .alert-info {
+      background-color: #e9f5ff;
+      border-color: #c2e0ff;
+      color: #1a73e8;
+    }
+  </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -45,6 +137,41 @@
   </div>
 </div>
 
-<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.cursor = 'pointer';
+      });
+
+      const btn = card.querySelector('.btn-primary');
+      if (btn) {
+        btn.addEventListener('mouseenter', function(e) {
+          e.stopPropagation();
+          this.style.transform = 'translateY(-2px)';
+        });
+
+        btn.addEventListener('mouseleave', function(e) {
+          e.stopPropagation();
+          this.style.transform = '';
+        });
+      }
+    });
+
+    const logoutBtn = document.querySelector('.btn-outline-light');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+      });
+
+      logoutBtn.addEventListener('mouseleave', function() {
+        this.style.transform = '';
+      });
+    }
+  });
+</script>
 </body>
 </html>

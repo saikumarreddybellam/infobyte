@@ -18,7 +18,6 @@ public class LeaderboardServiceImpl implements LeaderboardService {
     private final QuizAttemptRepository quizAttemptRepository;
     private final UserRepository userRepository;
 
-    // Top scorers for a specific quiz
     @Override
     public List<LeaderboardEntryDto> getTopScorersForQuiz(Long quizId) {
         return quizAttemptRepository.findByQuizIdOrderByScoreDesc(quizId).stream()
@@ -31,7 +30,6 @@ public class LeaderboardServiceImpl implements LeaderboardService {
                 .collect(Collectors.toList());
     }
 
-    // Overall top scorers (by total score)
     @Override
     public List<LeaderboardEntryDto> getOverallTopScorers() {
         return userRepository.findAll().stream()

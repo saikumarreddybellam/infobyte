@@ -42,7 +42,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Update password if provided
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             if (!request.getPassword().equals(request.getConfirmPassword())) {
                 throw new RuntimeException("Passwords do not match");
@@ -50,7 +49,6 @@ public class UserProfileServiceImpl implements UserProfileService {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
-        // Update email if provided and changed
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail())) {
                 throw new RuntimeException("Email already in use");

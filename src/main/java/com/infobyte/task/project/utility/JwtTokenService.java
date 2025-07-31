@@ -43,7 +43,6 @@ public class JwtTokenService {
         }
         return Jwts.builder()
                 .setSubject(user.getUsername())
-//                .claim("role", user.getRole())
                 .claim("role", "ROLE_" + user.getRole())  // Ensure role has ROLE_ prefix
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtConfig.getExpiration()))

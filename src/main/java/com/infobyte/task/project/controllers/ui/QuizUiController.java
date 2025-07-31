@@ -88,12 +88,10 @@ public class QuizUiController {
             BindingResult bindingResult,
             Model model) {
 
-        // Validate correct option index
         if (correctOptionIndex < 0 || correctOptionIndex >= questionDto.getOptions().size()) {
             bindingResult.rejectValue("options", "invalid.correctOption", "Please select a valid correct option");
         }
 
-        // Validate at least 2 options exist
         if (questionDto.getOptions() == null || questionDto.getOptions().size() < 2) {
             bindingResult.rejectValue("options", "size.min", "At least 2 options are required");
         }
@@ -103,7 +101,6 @@ public class QuizUiController {
             return "admin/questions/create";
         }
 
-        // Mark the correct option
         questionDto.getOptions().forEach(option -> option.setCorrect(false));
         questionDto.getOptions().get(correctOptionIndex).setCorrect(true);
 

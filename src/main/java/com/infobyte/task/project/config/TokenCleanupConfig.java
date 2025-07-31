@@ -15,7 +15,7 @@ public class TokenCleanupConfig {
     @Autowired
     private PasswordResetTokenRepository tokenRepository;
 
-    @Scheduled(cron = "0 0 * * * *") // Runs every hour
+    @Scheduled(cron = "0 0 * * * *")
     public void cleanupExpiredTokens() {
         tokenRepository.deleteByExpiryDateBefore(Instant.now());
     }

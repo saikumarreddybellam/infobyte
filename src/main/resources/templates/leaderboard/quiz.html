@@ -4,6 +4,83 @@
   <meta charset="UTF-8">
   <title th:text="${quizId != null} ? 'Quiz Leaderboard' : 'Overall Leaderboard'"></title>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .navbar {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+    .table {
+      margin-bottom: 0;
+    }
+    thead th {
+      background-color: #4e73df;
+      color: white;
+      border: none;
+      font-weight: 600;
+    }
+    tbody tr {
+      transition: all 0.3s ease;
+    }
+    tbody tr:hover {
+      transform: translateX(5px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .btn-secondary {
+      background-color: #6c757d;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+    .btn-secondary:hover {
+      background-color: #5a6268;
+      transform: translateY(-2px);
+    }
+    .btn-outline-light {
+      transition: all 0.3s;
+    }
+    .btn-outline-light:hover {
+      transform: translateY(-2px);
+    }
+    h2 {
+      color: #343a40;
+      font-weight: 700;
+      margin-bottom: 20px;
+      position: relative;
+      display: inline-block;
+    }
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background-color: #4e73df;
+    }
+    .navbar-text {
+      font-weight: 500;
+    }
+    .rank-1 {
+      background-color: #ffd700 !important;
+    }
+    .rank-2 {
+      background-color: #c0c0c0 !important;
+    }
+    .rank-3 {
+      background-color: #cd7f32 !important;
+    }
+  </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -18,32 +95,56 @@
   </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container mt-4 animate__animated animate__fadeIn">
   <h2 th:text="${quizId != null} ? 'Quiz Leaderboard' : 'Overall Leaderboard'"></h2>
   <a th:href="@{/ui/dashboard}" class="btn btn-secondary mb-3">Back to Dashboard</a>
 
   <div class="card">
-    <div class="card-body">
-      <table class="table table-striped">
-        <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Username</th>
-          <th>Score</th>
-          <th th:if="${quizId == null}">Date</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="entry, iter : ${entries}">
-          <td th:text="${iter.count}"></td>
-          <td th:text="${entry.username}"></td>
-          <td th:text="${entry.score}"></td>
-          <td th:if="${quizId == null}" th:text="${#temporals.format(entry.date, 'yyyy-MM-dd HH:mm')}"></td>
-        </tr>
-        </tbody>
-      </table>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Username</th>
+            <th>Score</th>
+            <th th:if="${quizId == null}">Date</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="entry, iter : ${entries}" th:classappend="${iter.count <= 3} ? 'rank-'+${iter.count}">
+            <td th:text="${iter.count}"></td>
+            <td th:text="${entry.username}"></td>
+            <td th:text="${entry.score}"></td>
+            <td th:if="${quizId == null}" th:text="${#temporals.format(entry.date, 'yyyy-MM-dd HH:mm')}"></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('tbody tr').each(function(index) {
+      $(this).css('animation-delay', (index * 0.1) + 's');
+    });
+
+    const currentUser = $('.navbar-text').text().replace('Welcome, ', '');
+    $('tbody tr').each(function() {
+      if ($(this).find('td:nth-child(2)').text() === currentUser) {
+        $(this).addClass('table-primary');
+        $(this).hover(
+          function() { $(this).removeClass('table-primary').addClass('table-info'); },
+          function() { $(this).removeClass('table-info').addClass('table-primary'); }
+        );
+      }
+    });
+
+    $('.rank-1, .rank-2, .rank-3').addClass('animate__animated animate__pulse animate__infinite');
+  });
+</script>
 </body>
 </html>

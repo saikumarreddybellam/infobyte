@@ -5,43 +5,117 @@
   <title th:text="${quiz.title} + ' Quiz'"></title>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
   <style>
+    body {
+      background-color: #f5f7fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
     .card {
-      border: 1px solid #dee2e6;
-      border-radius: 0.25rem;
-      margin-bottom: 1rem;
+      border: none;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
     }
     .card-header {
-      background-color: #f8f9fa;
-      padding: 0.75rem 1.25rem;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e9ecef;
+      padding: 1.25rem 1.5rem;
+      border-radius: 10px 10px 0 0 !important;
     }
-    .form-check-input:checked {
-      background-color: #0d6efd;
-      border-color: #0d6efd;
+    .form-check-input {
+      width: 1.2em;
+      height: 1.2em;
+      margin-top: 0.2em;
+    }
+    .form-check-label {
+      padding-left: 0.5em;
+      cursor: pointer;
+    }
+    .form-check:hover .form-check-label {
+      color: #0d6efd;
     }
     .feedback-correct {
       color: #198754;
       font-weight: bold;
+      padding: 0.75rem 1rem;
+      background-color: #e8f5e9;
+      border-radius: 6px;
+      margin-top: 1rem;
+      animation: fadeIn 0.5s ease;
     }
     .feedback-incorrect {
       color: #dc3545;
       font-weight: bold;
+      padding: 0.75rem 1rem;
+      background-color: #ffebee;
+      border-radius: 6px;
+      margin-top: 1rem;
+      animation: fadeIn 0.5s ease;
     }
     .progress-container {
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
+      background-color: #e9ecef;
+      border-radius: 20px;
+      height: 10px;
+    }
+    .progress-bar {
+      background-color: #4e73df;
+      border-radius: 20px;
+      transition: width 0.6s ease;
     }
     .nav-buttons {
       display: flex;
       justify-content: space-between;
-      margin-top: 1rem;
+      margin-top: 2rem;
     }
-    .correct-answer {
-      background-color: #d4edda;
+    .btn {
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    .btn-primary {
+      background-color: #4e73df;
+      border-color: #4e73df;
+    }
+    .btn-primary:hover {
+      background-color: #3a5bbf;
+      border-color: #3a5bbf;
     }
     .question-container {
-      display: none;
+      opacity: 0;
+      height: 0;
+      overflow: hidden;
+      transition: opacity 0.5s ease, height 0.5s ease;
     }
     .question-container.active {
-      display: block;
+      opacity: 1;
+      height: auto;
+    }
+    .badge {
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .text-success {
+      color: #198754 !important;
+    }
+    .navbar {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -63,7 +137,7 @@
   <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 th:text="${quiz.title}"></h2>
+    <h2 class="fw-bold" style="color: #2e3a4d;" th:text="${quiz.title}"></h2>
     <div>
       <span id="question-counter" class="badge bg-primary">Question 1 of <span th:text="${quiz.questions.size()}"></span></span>
       <a th:href="@{/ui/user/quizzes}" class="btn btn-secondary ms-2">Exit Quiz</a>
@@ -82,12 +156,12 @@
     <div th:each="question, qStat : ${quiz.questions}" class="question-container" id="question-__${qStat.index}__">
       <div class="card mb-4">
         <div class="card-header">
-          <h5 class="mb-0" th:text="${qStat.count} + '. ' + ${question.questionText}"></h5>
+          <h5 class="mb-0 fw-semibold" th:text="${qStat.count} + '. ' + ${question.questionText}"></h5>
         </div>
         <div class="card-body">
           <input type="hidden" th:name="answers[__${qStat.index}__].questionId" th:value="${question.id}"/>
 
-          <div th:each="option : ${question.options}" class="form-check mb-2">
+          <div th:each="option : ${question.options}" class="form-check mb-3">
             <input class="form-check-input" type="radio"
                    th:name="answers[__${qStat.index}__].selectedOptionId"
                    th:value="${option.id}"
@@ -120,40 +194,37 @@
     const questionCounter = document.getElementById('question-counter');
     let currentQuestion = 0;
 
-    // Initialize first question
     showQuestion(currentQuestion);
     updateProgress();
 
-    // Next button click handler
     document.querySelectorAll('.next-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         if (validateCurrentQuestion()) {
+          questionContainers[currentQuestion].classList.remove('active');
           currentQuestion++;
-          showQuestion(currentQuestion);
-          updateProgress();
+          setTimeout(() => {
+            showQuestion(currentQuestion);
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 300);
         }
       });
     });
 
-    // Previous button click handler
     document.querySelectorAll('.prev-btn').forEach(btn => {
       btn.addEventListener('click', function() {
+        questionContainers[currentQuestion].classList.remove('active');
         currentQuestion--;
-        showQuestion(currentQuestion);
-        updateProgress();
+        setTimeout(() => {
+          showQuestion(currentQuestion);
+          updateProgress();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 300);
       });
     });
 
     function showQuestion(index) {
-      questionContainers.forEach((container, i) => {
-        if (i === index) {
-          container.classList.add('active');
-        } else {
-          container.classList.remove('active');
-        }
-      });
-
-      // Update question counter
+      questionContainers[index].classList.add('active');
       questionCounter.textContent = `Question ${index + 1} of ${questionContainers.length}`;
     }
 
@@ -173,21 +244,18 @@
         return false;
       }
 
-      // Show feedback for the selected answer
       const selectedRadio = currentContainer.querySelector('input[type="radio"]:checked');
       if (selectedRadio) {
         const isCorrect = selectedRadio.dataset.correct === 'true';
         const feedback = document.createElement('div');
         feedback.className = isCorrect ? 'feedback-correct mt-3' : 'feedback-incorrect mt-3';
-        feedback.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
+        feedback.textContent = isCorrect ? '✓ Correct! Well done!' : '✗ Incorrect. Try again!';
 
-        // Remove previous feedback if any
         const oldFeedback = currentContainer.querySelector('.feedback-correct, .feedback-incorrect');
         if (oldFeedback) oldFeedback.remove();
 
         currentContainer.querySelector('.card-body').appendChild(feedback);
 
-        // Highlight correct answer if wrong was selected
         if (!isCorrect) {
           const correctRadio = currentContainer.querySelector('input[data-correct="true"]');
           if (correctRadio) {

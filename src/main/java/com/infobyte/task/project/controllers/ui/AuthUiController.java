@@ -37,7 +37,6 @@ public class AuthUiController {
         try {
             LoginResponse loginResponse = authService.login(request);
 
-            // Set cookie
             Cookie cookie = new Cookie("AUTH_TOKEN", loginResponse.getToken());
             cookie.setHttpOnly(true);
             cookie.setPath("/");
@@ -87,7 +86,6 @@ public class AuthUiController {
 
     @GetMapping("/logout")
     public String logout(HttpServletResponse response) {
-        // Clear the auth cookie
         Cookie cookie = new Cookie("AUTH_TOKEN", null);
         cookie.setMaxAge(0);
         cookie.setHttpOnly(true);

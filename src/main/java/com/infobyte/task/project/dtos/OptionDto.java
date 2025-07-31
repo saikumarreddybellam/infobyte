@@ -10,7 +10,7 @@ public class OptionDto {
     @NotBlank(message = "Option text is required")
     private String text;
 
-    private boolean correct;  // Changed from isCorrect to correct
+    private boolean correct;
 
     private Long questionId;
 

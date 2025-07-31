@@ -4,13 +4,66 @@
   <meta charset="UTF-8">
   <title>Add New Question</title>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 800px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin-top: 30px;
+    }
+    h2 {
+      color: #343a40;
+      margin-bottom: 20px;
+    }
+    .options-container {
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      padding: 15px;
+      background-color: #f8f9fa;
+    }
+    .option-row {
+      transition: all 0.3s ease;
+      margin-bottom: 10px;
+    }
+    .option-row:last-child {
+      margin-bottom: 0;
+    }
+    .input-group {
+      transition: all 0.3s ease;
+    }
+    .remove-option {
+      transition: all 0.2s ease;
+    }
+    .remove-option:hover {
+      transform: scale(1.05);
+    }
+    #add-option {
+      margin-top: 10px;
+    }
+    .form-control:focus, .form-check-input:focus {
+      box-shadow: 0 0 0 0.25rem rgba(13,110,253,0.25);
+    }
+    .btn-primary {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+    }
+    .btn-primary:hover {
+      background-color: #0b5ed7;
+      border-color: #0a58ca;
+    }
+  </style>
 </head>
 <body>
 <div class="container mt-4">
   <h2>Add New Question</h2>
   <a th:href="@{/ui/admin/questions/{quizId}/list(quizId=${quizId})}" class="btn btn-secondary mb-3">Back to Questions</a>
 
-  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" th:text="${error}"></div>
 
   <form th:action="@{/ui/admin/questions/{quizId}(quizId=${quizId})}" method="post">
     <div class="mb-3">
@@ -30,10 +83,10 @@
                    th:field="*{questionDto.options[__${iterStat.index}__].isCorrect}">
             <label class="form-check-label ms-2">Correct?</label>
           </div>
-          <button type="button" class="btn btn-outline-danger remove-option">Remove</button>
+          <button type="button" class="btn btn-outline-danger remove-option">×</button>
         </div>
       </div>
-      <button type="button" class="btn btn-sm btn-outline-primary" id="add-option">Add Option</button>
+      <button type="button" class="btn btn-sm btn-outline-primary" id="add-option">+ Add Option</button>
     </div>
 
     <button type="submit" class="btn btn-primary">Save Question</button>
@@ -44,25 +97,30 @@
 <script>
   $(document).ready(function() {
       $('#add-option').click(function() {
+          const optionCount = $('.option-row').length;
           const newOption = `
           <div class="option-row mb-2">
               <div class="input-group">
-                  <input type="text" class="form-control" name="questionDto.options[__${$('.option-row').length}__].text"
+                  <input type="text" class="form-control" name="questionDto.options[${optionCount}].text"
                          placeholder="Option text" required>
                   <div class="input-group-text">
                       <input class="form-check-input" type="checkbox"
-                             name="questionDto.options[__${$('.option-row').length}__].isCorrect">
+                             name="questionDto.options[${optionCount}].isCorrect">
                       <label class="form-check-label ms-2">Correct?</label>
                   </div>
-                  <button type="button" class="btn btn-outline-danger remove-option">Remove</button>
+                  <button type="button" class="btn btn-outline-danger remove-option">×</button>
               </div>
           </div>`;
           $('.options-container').append(newOption);
+          $('.options-container').scrollTop($('.options-container')[0].scrollHeight);
       });
 
       $(document).on('click', '.remove-option', function() {
-          $(this).closest('.option-row').remove();
+          $(this).closest('.option-row').fadeOut(200, function() {
+              $(this).remove();
+          });
       });
+  });
 </script>
 </body>
 </html>

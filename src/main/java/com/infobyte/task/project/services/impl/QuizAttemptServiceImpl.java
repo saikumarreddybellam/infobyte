@@ -150,7 +150,6 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         QuizAttempt attempt = quizAttemptRepository.findById(attemptId)
                 .orElseThrow(() -> new RuntimeException("Quiz attempt not found"));
 
-        // Verify the attempt belongs to the requesting user
         if (!attempt.getUser().getUsername().equals(username)) {
             throw new RuntimeException("Unauthorized access to quiz attempt");
         }

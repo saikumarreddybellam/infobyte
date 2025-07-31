@@ -4,14 +4,108 @@
   <meta charset="UTF-8">
   <title>Dashboard</title>
   <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <style>
-    .card {
-      transition: transform 0.2s;
-      margin-bottom: 20px;
+    :root {
+      --primary-color: #4e73df;
+      --secondary-color: #1cc88a;
+      --info-color: #36b9cc;
+      --warning-color: #f6c23e;
+      --dark-color: #5a5c69;
     }
+
+    body {
+      background-color: #f8f9fc;
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .navbar {
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.25rem;
+    }
+
+    .card {
+      transition: all 0.3s ease-in-out;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 0.35rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+      overflow: hidden;
+    }
+
     .card:hover {
-      transform: scale(1.03);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transform: translateY(-5px);
+      box-shadow: 0 0.5rem 1.5rem 0 rgba(58, 59, 69, 0.2);
+    }
+
+    .card-title {
+      font-weight: 600;
+    }
+
+    .bg-primary { background-color: var(--primary-color) !important; }
+    .bg-success { background-color: var(--secondary-color) !important; }
+    .bg-info { background-color: var(--info-color) !important; }
+    .bg-warning { background-color: var(--warning-color) !important; }
+
+    .container {
+      max-width: 1200px;
+    }
+
+    h1 {
+      font-weight: 700;
+      color: var(--dark-color);
+      margin-bottom: 1rem;
+    }
+
+    .lead {
+      color: #858796;
+      font-size: 1.1rem;
+    }
+
+    .btn-light {
+      transition: all 0.2s;
+      border-radius: 0.25rem;
+      font-weight: 600;
+    }
+
+    .btn-light:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-text a {
+      transition: color 0.2s;
+    }
+
+    .navbar-text a:hover {
+      color: #d1d3e2 !important;
+      text-decoration: none;
+    }
+
+    .nav-link {
+      position: relative;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: white;
+      transition: all 0.3s;
+    }
+
+    .nav-link:hover::after {
+      width: 80%;
+      left: 10%;
     }
   </style>
 </head>
@@ -49,7 +143,7 @@
   </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container mt-4 animate__animated animate__fadeIn">
   <div class="row">
     <div class="col-md-12">
       <h1>Dashboard</h1>
@@ -110,5 +204,35 @@
 </div>
 
 <script src="/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('.card').hover(
+      function() {
+        $(this).addClass('animate__animated animate__pulse');
+      },
+      function() {
+        $(this).removeClass('animate__animated animate__pulse');
+      }
+    );
+
+    $('a[href^="#"]').on('click', function(event) {
+      event.preventDefault();
+      $('html, body').animate({
+        scrollTop: $($(this).attr('href')).offset().top
+      }, 500);
+    });
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 50) {
+        $('.navbar').addClass('shadow-sm');
+      } else {
+        $('.navbar').removeClass('shadow-sm');
+      }
+    });
+  });
+</script>
 </body>
 </html>

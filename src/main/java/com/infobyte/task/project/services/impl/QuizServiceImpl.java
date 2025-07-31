@@ -48,18 +48,14 @@ public class QuizServiceImpl implements QuizService {
     @Override
     @Transactional
     public void deleteQuiz(Long quizId) {
-        // 1. Find all quiz attempts for this quiz
         List<QuizAttempt> attempts = quizAttemptRepository.findByQuizId(quizId);
 
-        // 2. For each attempt, delete its user answers
         attempts.forEach(attempt -> {
             userAnswerRepository.deleteByQuizAttemptId(attempt.getId());
         });
 
-        // 3. Delete all quiz attempts
         quizAttemptRepository.deleteByQuizId(quizId);
 
-        // 4. Delete the quiz (which will cascade to questions and options)
         quizRepository.deleteById(quizId);
     }
 

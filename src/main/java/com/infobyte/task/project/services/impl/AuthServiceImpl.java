@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole("USER"); // Default role
+        user.setRole("USER");
         user.setEmail(request.getEmail());
 
         try {
@@ -84,14 +84,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void initiatePasswordReset(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
-        // Delete any existing tokens for this user
         tokenRepository.deleteByUser(user);
 
-        // Create new token
         PasswordResetToken resetToken = new PasswordResetToken(user);
         tokenRepository.save(resetToken);
 
-        // Send email
         sendPasswordResetEmail(user, resetToken.getToken());
     }
 
@@ -111,23 +108,19 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        // Clean up
         tokenRepository.delete(token);
     }
 
     @Override
     @Transactional
     public void sendPasswordResetEmail(String email) {
-        // 1. Find user by email
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
 
-        // 2. Generate and save token
         PasswordResetToken resetToken = new PasswordResetToken(user);
         tokenRepository.deleteByUser(user); // Remove any existing tokens
         tokenRepository.save(resetToken);
 
-        // 3. Send email
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);

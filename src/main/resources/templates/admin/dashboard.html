@@ -3,7 +3,104 @@
 <head>
   <meta charset="UTF-8">
   <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4e73df;
+      --secondary-color: #1cc88a;
+      --accent-color: #36b9cc;
+      --dark-color: #5a5c69;
+    }
+
+    body {
+      background-color: #f8f9fc;
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .navbar {
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+      padding: 0.75rem 1rem;
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.25rem;
+    }
+
+    .card {
+      border: none;
+      border-radius: 0.35rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0.5rem 1.5rem 0 rgba(58, 59, 69, 0.2);
+    }
+
+    .card-title {
+      font-weight: 600;
+      color: var(--dark-color);
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+      background-color: #2e59d9;
+      border-color: #2653d4;
+    }
+
+    .card-header {
+      background-color: #f8f9fc;
+      border-bottom: 1px solid #e3e6f0;
+    }
+
+    .quick-stats h3 {
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .quick-stats p {
+      font-size: 0.9rem;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-item::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 0;
+      background-color: var(--secondary-color);
+      transition: width 0.3s ease;
+    }
+
+    .nav-item:hover::after {
+      width: 100%;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+  </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -12,7 +109,9 @@
     <div class="navbar-nav ms-auto">
       <span class="navbar-text me-3" th:text="'Welcome, ' + ${#authentication.name}"></span>
       <form th:action="@{/logout}" method="post">
-        <button type="submit" class="btn btn-outline-light">Logout</button>
+        <button type="submit" class="btn btn-outline-light">
+          <i class="fas fa-sign-out-alt me-1"></i> Logout
+        </button>
       </form>
     </div>
   </div>
@@ -23,53 +122,110 @@
     <div class="col-md-4 mb-4">
       <div class="card h-100">
         <div class="card-body text-center">
+          <div class="icon-circle bg-primary text-white mb-3 mx-auto">
+            <i class="fas fa-list-alt fa-2x"></i>
+          </div>
           <h5 class="card-title">Manage Quizzes</h5>
           <p class="card-text">Create, edit, and organize quizzes</p>
-          <a th:href="@{/ui/admin/quizzes}" class="btn btn-primary">Go to Quizzes</a>
+          <a th:href="@{/ui/admin/quizzes}" class="btn btn-primary">
+            <i class="fas fa-arrow-right me-1"></i> Go to Quizzes
+          </a>
         </div>
       </div>
     </div>
     <div class="col-md-4 mb-4">
       <div class="card h-100">
         <div class="card-body text-center">
+          <div class="icon-circle bg-success text-white mb-3 mx-auto">
+            <i class="fas fa-users fa-2x"></i>
+          </div>
           <h5 class="card-title">Manage Users</h5>
           <p class="card-text">View and manage user accounts</p>
-          <a th:href="@{/ui/admin/users}" class="btn btn-primary">Go to Users</a>
+          <a th:href="@{/ui/admin/users}" class="btn btn-primary">
+            <i class="fas fa-arrow-right me-1"></i> Go to Users
+          </a>
         </div>
       </div>
     </div>
     <div class="col-md-4 mb-4">
       <div class="card h-100">
         <div class="card-body text-center">
+          <div class="icon-circle bg-info text-white mb-3 mx-auto">
+            <i class="fas fa-chart-line fa-2x"></i>
+          </div>
           <h5 class="card-title">System Analytics</h5>
           <p class="card-text">View usage statistics and reports</p>
-          <a th:href="@{/ui/admin/analytics}" class="btn btn-primary">View Analytics</a>
+          <a th:href="@{/ui/admin/analytics}" class="btn btn-primary">
+            <i class="fas fa-arrow-right me-1"></i> View Analytics
+          </a>
         </div>
       </div>
     </div>
   </div>
 
   <div class="card mt-4">
-    <div class="card-header">
-      <h5>Quick Stats</h5>
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="m-0">Quick Stats</h5>
+      <button id="refreshStats" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-sync-alt"></i>
+      </button>
     </div>
     <div class="card-body">
-      <div class="row">
+      <div class="row quick-stats">
         <div class="col-md-4 text-center">
-          <h3 th:text="${quizCount}"></h3>
+          <h3 class="counter" th:text="${quizCount}"></h3>
           <p class="text-muted">Total Quizzes</p>
         </div>
         <div class="col-md-4 text-center">
-          <h3 th:text="${userCount}"></h3>
+          <h3 class="counter" th:text="${userCount}"></h3>
           <p class="text-muted">Registered Users</p>
         </div>
         <div class="col-md-4 text-center">
-          <h3 th:text="${attemptCount}"></h3>
+          <h3 class="counter" th:text="${attemptCount}"></h3>
           <p class="text-muted">Quiz Attempts</p>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('.card').hover(
+      function() {
+        $(this).css('cursor', 'pointer');
+      },
+      function() {
+        $(this).css('cursor', 'default');
+      }
+    );
+
+    $('#refreshStats').click(function() {
+      $(this).addClass('fa-spin');
+      setTimeout(() => {
+        $(this).removeClass('fa-spin');
+      }, 1000);
+    });
+
+    $('.counter').each(function() {
+      $(this).prop('Counter', 0).animate({
+        Counter: $(this).text()
+      }, {
+        duration: 1000,
+        easing: 'swing',
+        step: function(now) {
+          $(this).text(Math.ceil(now));
+        }
+      });
+    });
+
+    $('.card').click(function() {
+      $('.card').removeClass('border-primary');
+      $(this).addClass('border-primary');
+    });
+  });
+</script>
 </body>
 </html>

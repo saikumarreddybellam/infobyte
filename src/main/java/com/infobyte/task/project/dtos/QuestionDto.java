@@ -21,7 +21,6 @@ public class QuestionDto {
 
     private Long quizId;
 
-    // Add explicit getters and setters if Lombok isn't working properly
     public List<OptionDto> getOptions() {
         return options;
     }
